@@ -55,13 +55,3 @@ dotnet test ReportService.sln
 
 ## CI
 Workflow em `.github/workflows/ci.yml` com restore, build e test.
-
-## Limitações atuais
-- Sem broker real (RabbitMQ/Kafka) no MVP; apenas abstração e implementação inicial.
-- SQLite local por simplicidade; PostgreSQL recomendado para ambiente compartilhado.
-- Migrações EF podem ser adicionadas conforme evolução.
-
-## Próximos passos
-- Adicionar autenticação/autorização no gateway e trust boundary.
-- Implementar consumer com broker real.
-- Expandir testes de integração de API e contratos entre serviços.
