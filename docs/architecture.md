@@ -25,7 +25,7 @@ graph TD
         APP["Application Layer\nCasos de Uso · Validação"]
         DOMAIN["Domain Layer\nEntidades · Regras"]
         INFRA["Infrastructure Layer\nEF Core · Repository"]
-        DB[("🗃️ SQLite\nreports.db")]
+        DB[("🗃️ MySQL")]
     end
 
     User -->|"POST diagrama\nimagem ou PDF"| GW
@@ -58,7 +58,7 @@ sequenceDiagram
     participant PROC as Processing Service
     participant IA as Modelo IA
     participant RS as Report Service
-    participant DB as SQLite
+    participant DB as MySQL
 
     User->>GW: POST /upload (diagrama)
     GW->>UPL: encaminha arquivo
@@ -104,7 +104,7 @@ graph LR
     subgraph Infrastructure["Infrastructure Layer"]
         REPO["EfReportRepository"]
         CTX["ReportDbContext\nEF Core 9"]
-        DB[("SQLite")]
+        DB[("MySQL")]
     end
 
     CTRL --> MGR

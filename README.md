@@ -11,7 +11,7 @@ src/
 ├── ReportService.Api            → API REST, Swagger, health check, middleware
 ├── ReportService.Application    → casos de uso, validações, contratos
 ├── ReportService.Domain         → entidades e enums de negócio
-└── ReportService.Infrastructure → persistência EF Core (SQLite)
+└── ReportService.Infrastructure → persistência EF Core (MySQL)
 
 tests/
 ├── ReportService.Tests          → testes unitários (xUnit + NSubstitute)
@@ -44,7 +44,7 @@ graph TD
         API["REST API"]
         APP["Application Layer"]
         INFRA["Infrastructure Layer"]
-        DB[("🗃️ SQLite")]
+        DB[("🗃️ MySQL")]
     end
 
     User -->|"POST diagrama"| GW
@@ -69,7 +69,7 @@ graph TD
 O **serviço de processamento** realiza a análise com IA e ao finalizar faz uma chamada `POST /api/reports` para este serviço com o resultado estruturado.
 
 ```
-[Serviço de Processamento] ──POST /api/reports──► [Report Service] ──► SQLite
+[Serviço de Processamento] ──POST /api/reports──► [Report Service] ──► MySQL
 ```
 
 ---
@@ -112,10 +112,9 @@ A API conecta em `localhost:3306` e aplica as migrations automaticamente na inic
 API disponível em: `http://localhost:5000`  
 Swagger UI: `http://localhost:5000/swagger`
 
-> **Connection string padrão (local):**  
-> `Server=localhost;Port=3306;Database=reports;User=root;Password=root;`  
-> Para customizar, altere `appsettings.json` ou exporte a variável de ambiente:  
-> `ConnectionStrings__Default=Server=...`
+> **Connection string local** definida em `appsettings.Development.json` (não versionado).  
+> Para customizar, edite esse arquivo ou exporte a variável de ambiente:  
+> `ConnectionStrings__Default=Server=localhost;Port=3306;Database=reports;User=...;Password=...;`
 
 ---
 
@@ -131,7 +130,7 @@ docker compose up --build
 O Docker Compose sobe o MySQL 8.4 e o serviço de relatórios. O serviço aguarda o MySQL estar saudável antes de iniciar e aplica as migrations automaticamente.
 
 API disponível em: `http://localhost:8080`  
-Swagger UI: `http://localhost:8080/swagger`
+> O Swagger UI (`/swagger`) só está disponível no ambiente `Development`. Em produção (Docker padrão) use Postman ou curl para testar os endpoints.
 
 ---
 
@@ -290,9 +289,9 @@ Toda entrada é validada no boundary HTTP antes de qualquer persistência:
 
 | Risco | Impacto | Situação |
 |-------|---------|----------|
-| SQLite sem autenticação | Acesso direto ao arquivo `.db` expõe todos os dados | Aceitável para MVP; em produção substituir por banco com controle de acesso |
 | Endpoints sem autenticação/autorização | Qualquer chamante pode criar, ler ou alterar relatórios | Aceitável para MVP; em produção adicionar JWT ou API Key |
 | Sem rate limiting | Suscetível a abuso por volume de requisições | Mitigar com API Gateway na frente do serviço |
+| Credenciais do banco via variável de ambiente | Exposição se o ambiente não for gerenciado corretamente | Em produção usar secrets manager (ex: AWS Secrets Manager, Azure Key Vault) |
 
 ---
 
@@ -322,6 +321,6 @@ Para usar a imagem publicada localmente:
 ```bash
 docker pull ghcr.io/<org>/<repo>:latest
 docker run -p 8080:8080 \
-  -e ConnectionStrings__Default="Server=<host>;Port=3306;Database=reports;User=root;Password=root;" \
+  -e ConnectionStrings__Default="Server=<host>;Port=3306;Database=reports;User=<user>;Password=<password>;" \
   ghcr.io/<org>/<repo>:latest
 ```
