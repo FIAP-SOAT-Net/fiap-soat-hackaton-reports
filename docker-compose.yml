@@ -1,15 +1,16 @@
 services:
   mysql:
     image: mysql:8.4
+    env_file: .env
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: reports
-    ports:
-      - "3306:3306"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,9 +19,11 @@ services:
     build: .
     ports:
       - "8080:8080"
+    env_file: .env
     environment:
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=reports;User=root;Password=root;
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=${ConnectionStrings__Default}
     depends_on:
       mysql:
         condition: service_healthy

@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.env.*
+**/appsettings.Development.json
+**/appsettings.*.json
+!**/appsettings.json
+**/*.lscache
+**/bin
+**/obj
+**/TestResults
+tests/
+docs/
+*.md
+*.db

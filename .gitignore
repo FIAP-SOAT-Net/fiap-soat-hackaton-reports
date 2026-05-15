@@ -436,3 +436,7 @@ CLAUDE.md
 # Arquivos locais
 *.lscache
 *.db
+
+# Variáveis de ambiente
+.env
+appsettings.Development.json

@@ -7,6 +7,7 @@ namespace ReportService.Application;
 public class ReportServiceManager(IReportRepository repository)
 {
     private static readonly Regex HtmlRegex = new("<[^>]+>", RegexOptions.Compiled);
+    private const int MaxListItems = 50;
 
     public async Task<Report> CreateAsync(CreateReportRequest request, CancellationToken ct = default)
     {
@@ -49,6 +50,9 @@ public class ReportServiceManager(IReportRepository repository)
         if (request.AnalysisProcessId == Guid.Empty) details.Add("analysisProcessId é obrigatório");
         if (string.IsNullOrWhiteSpace(request.SourceFileName)) details.Add("sourceFileName é obrigatório");
         if ((request.Components?.Count ?? 0) + (request.Risks?.Count ?? 0) + (request.Recommendations?.Count ?? 0) == 0) details.Add("Ao menos uma lista deve ser preenchida");
+        if ((request.Components?.Count ?? 0) > MaxListItems) details.Add($"components excede o limite de {MaxListItems} itens");
+        if ((request.Risks?.Count ?? 0) > MaxListItems) details.Add($"risks excede o limite de {MaxListItems} itens");
+        if ((request.Recommendations?.Count ?? 0) > MaxListItems) details.Add($"recommendations excede o limite de {MaxListItems} itens");
         foreach (var s in request.Risks.Select(r => r.Severity)) if (!Enum.TryParse<RiskSeverity>(s, true, out _)) details.Add($"severity inválida: {s}");
         IEnumerable<string> texts = [request.SourceFileName, ..request.Components.SelectMany(c => new[] { c.Name, c.Type, c.Description }), ..request.Risks.SelectMany(r => new[] { r.Title, r.Description, r.Recommendation }), ..request.Recommendations.SelectMany(r => new[] { r.Title, r.Description })];
         if (texts.Any(t => string.IsNullOrWhiteSpace(t) || t.Length > 500 || HtmlRegex.IsMatch(t))) details.Add("Campos textuais inválidos (vazio, HTML/script ou tamanho > 500)");

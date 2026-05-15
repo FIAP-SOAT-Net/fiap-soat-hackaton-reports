@@ -27,7 +27,8 @@ public class ReportsController(ReportServiceManager manager, IReportRepository r
         var r = await repository.GetByIdAsync(id, ct);
         if (r is null) return NotFound(new ErrorResponse("REPORT_NOT_FOUND", "Relatório não encontrado.", []));
         var pdf = ReportPdfGenerator.Generate(r);
-        return File(pdf, "application/pdf", $"relatorio-{r.SourceFileName}.pdf");
+        var safeFileName = string.Concat(r.SourceFileName.Split(Path.GetInvalidFileNameChars())).Replace(" ", "_");
+        return File(pdf, "application/pdf", $"relatorio-{safeFileName}.pdf");
     }
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateStatusRequest req, CancellationToken ct)
