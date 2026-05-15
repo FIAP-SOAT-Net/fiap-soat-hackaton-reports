@@ -1,10 +1,29 @@
 services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: reports
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   reportservice:
     build: .
-    ports: ["8080:8080"]
+    ports:
+      - "8080:8080"
     environment:
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__Default=Data Source=/data/reports.db
-    volumes: ["report_data:/data"]
+      - ConnectionStrings__Default=Server=mysql;Port=3306;Database=reports;User=root;Password=root;
+    depends_on:
+      mysql:
+        condition: service_healthy
+
 volumes:
-  report_data:
+  mysql_data:

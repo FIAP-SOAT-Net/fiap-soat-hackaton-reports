@@ -15,7 +15,6 @@ public class ReportServiceManager(IReportRepository repository)
         var report = new Report
         {
             AnalysisProcessId = request.AnalysisProcessId,
-            DiagramId = request.DiagramId,
             SourceFileName = request.SourceFileName.Trim(),
             Status = ReportStatus.Generated,
             Components = request.Components.Select(c => new ReportComponent { Name = c.Name, Type = c.Type, Description = c.Description }).ToList(),
@@ -48,7 +47,6 @@ public class ReportServiceManager(IReportRepository repository)
     {
         var details = new List<string>();
         if (request.AnalysisProcessId == Guid.Empty) details.Add("analysisProcessId é obrigatório");
-        if (request.DiagramId == Guid.Empty) details.Add("diagramId é obrigatório");
         if (string.IsNullOrWhiteSpace(request.SourceFileName)) details.Add("sourceFileName é obrigatório");
         if ((request.Components?.Count ?? 0) + (request.Risks?.Count ?? 0) + (request.Recommendations?.Count ?? 0) == 0) details.Add("Ao menos uma lista deve ser preenchida");
         foreach (var s in request.Risks.Select(r => r.Severity)) if (!Enum.TryParse<RiskSeverity>(s, true, out _)) details.Add($"severity inválida: {s}");
@@ -57,6 +55,3 @@ public class ReportServiceManager(IReportRepository repository)
         if (details.Count > 0) throw new ArgumentException(string.Join(";", details));
     }
 }
-
-public class AnalysisCompletedConsumer(ReportServiceManager manager) : IAnalysisCompletedConsumer
-{ public async Task ConsumeAsync(AnalysisCompletedEvent m, CancellationToken ct = default) => await manager.CreateAsync(new CreateReportRequest(m.AnalysisProcessId,m.DiagramId,m.SourceFileName,m.Components,m.Risks,m.Recommendations,m.AiModelInfo), ct); }

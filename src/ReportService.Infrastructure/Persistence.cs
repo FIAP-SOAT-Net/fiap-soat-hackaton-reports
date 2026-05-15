@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using ReportService.Application;
 using ReportService.Domain;
 
@@ -32,4 +33,19 @@ public class EfReportRepository(ReportDbContext db) : IReportRepository
         return await q.OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
     }
     public Task SaveChangesAsync(CancellationToken ct = default) => db.SaveChangesAsync(ct);
+}
+
+public class ReportDbContextFactory : IDesignTimeDbContextFactory<ReportDbContext>
+{
+    public ReportDbContext CreateDbContext(string[] args)
+    {
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
+            ?? "Server=localhost;Port=3306;Database=reports;User=root;Password=root;";
+
+        var options = new DbContextOptionsBuilder<ReportDbContext>()
+            .UseMySql(connectionString, new MySqlServerVersion(new Version(8, 4, 0)))
+            .Options;
+
+        return new ReportDbContext(options);
+    }
 }

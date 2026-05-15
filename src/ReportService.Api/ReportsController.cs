@@ -20,6 +20,15 @@ public class ReportsController(ReportServiceManager manager, IReportRepository r
     [HttpGet] public async Task<IActionResult> List([FromQuery] ReportStatus? status,[FromQuery] Guid? analysisProcessId,[FromQuery] DateTime? createdAtFrom,[FromQuery] DateTime? createdAtTo,CancellationToken ct) => Ok(await repository.ListAsync(new(status,analysisProcessId,createdAtFrom,createdAtTo), ct));
     [HttpGet("{id:guid}/export/markdown")] public async Task<IActionResult> Markdown(Guid id, CancellationToken ct) => await repository.GetByIdAsync(id, ct) is { } r ? Content(ReportServiceManager.ToMarkdown(r), "text/markdown") : NotFound(new ErrorResponse("REPORT_NOT_FOUND", "Relatório não encontrado.", []));
     [HttpGet("{id:guid}/export/json")] public async Task<IActionResult> JsonExport(Guid id, CancellationToken ct) => await repository.GetByIdAsync(id, ct) is { } r ? Ok(r) : NotFound(new ErrorResponse("REPORT_NOT_FOUND", "Relatório não encontrado.", []));
+
+    [HttpGet("{id:guid}/export/pdf")]
+    public async Task<IActionResult> PdfExport(Guid id, CancellationToken ct)
+    {
+        var r = await repository.GetByIdAsync(id, ct);
+        if (r is null) return NotFound(new ErrorResponse("REPORT_NOT_FOUND", "Relatório não encontrado.", []));
+        var pdf = ReportPdfGenerator.Generate(r);
+        return File(pdf, "application/pdf", $"relatorio-{r.SourceFileName}.pdf");
+    }
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateStatusRequest req, CancellationToken ct)
     {

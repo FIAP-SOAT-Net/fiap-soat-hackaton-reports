@@ -429,3 +429,10 @@ FodyWeavers.xsd
 *.msp
 
 volume/cache/
+
+# Claude Code
+CLAUDE.md
+
+# Arquivos locais
+*.lscache
+*.db

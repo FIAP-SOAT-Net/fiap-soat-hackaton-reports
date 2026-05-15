@@ -7,7 +7,6 @@ public class Report
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid AnalysisProcessId { get; set; }
-    public Guid DiagramId { get; set; }
     public string SourceFileName { get; set; } = string.Empty;
     public ReportStatus Status { get; set; } = ReportStatus.Generated;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
