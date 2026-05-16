@@ -1,4 +1,4 @@
-name: Analyzer Service | Docker Publish
+name: Reports Service | Docker Publish
 
 on:
   workflow_dispatch:
